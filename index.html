@@ -948,7 +948,11 @@
 
         <!-- Contact Form -->
         <div class="contact-form-col" data-aos="fade-left">
-          <form class="glass-form" id="contact-form">
+          <form class="glass-form" id="contact-form" action="https://api.web3forms.com/submit" method="POST">
+            <input type="hidden" name="access_key" value="6a2f4497-26da-4e84-a436-bf9a06197a0e">
+            <input type="hidden" name="from_name" value="John Marshal Portfolio">
+            <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
+            
             <h4 class="form-title">Send a Direct Message</h4>
             
             <div class="form-group">

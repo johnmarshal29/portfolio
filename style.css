@@ -2421,6 +2421,13 @@ button, input, textarea {
   color: var(--accent-blue);
 }
 
+.toast.error {
+  border-color: #ef4444;
+}
+.toast.error i {
+  color: #ef4444;
+}
+
 .toast-msg {
   font-size: 0.88rem;
   line-height: 1.4;

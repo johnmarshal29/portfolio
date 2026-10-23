@@ -523,18 +523,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // 10. CONTACT FORM SUBMISSION WITH INTERACTIVE FEEDBACK
+  // 10. CONTACT FORM SUBMISSION VIA WEB3FORMS WITH REAL-TIME FEEDBACK
   // --------------------------------------------------------------------------
   const contactForm = document.getElementById('contact-form');
   const contactSubmitBtn = document.getElementById('contact-submit-btn');
 
   if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
+    contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const name = document.getElementById('contact-name').value.trim();
       const email = document.getElementById('contact-email').value.trim();
-      const subject = document.getElementById('contact-subject').value.trim();
       const message = document.getElementById('contact-message').value.trim();
 
       if (!name || !email || !message) {
@@ -546,18 +545,43 @@ document.addEventListener('DOMContentLoaded', () => {
       contactSubmitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending message...';
       contactSubmitBtn.disabled = true;
 
-      setTimeout(() => {
-        contactSubmitBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Message Transmitted!';
-        contactSubmitBtn.style.background = 'var(--accent-emerald)';
-        showToast(`Thank you, ${name}! Your inquiry has been forwarded to John.`, 'success');
-        contactForm.reset();
+      const formData = new FormData(contactForm);
+      const jsonObject = Object.fromEntries(formData);
 
+      try {
+        const response = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(jsonObject)
+        });
+
+        const data = await response.json();
+
+        if (response.status === 200 && data.success) {
+          contactSubmitBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Message Transmitted!';
+          contactSubmitBtn.style.background = 'var(--accent-emerald)';
+          showToast(`Thank you, ${name}! Your inquiry has been sent to John.`, 'success');
+          contactForm.reset();
+        } else {
+          contactSubmitBtn.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Delivery Failed';
+          contactSubmitBtn.style.background = '#ef4444';
+          showToast(data.message || 'Unable to submit message. Please try again or email directly.', 'error');
+        }
+      } catch (err) {
+        console.error('Web3Forms Error:', err);
+        contactSubmitBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Error Occurred';
+        contactSubmitBtn.style.background = '#ef4444';
+        showToast('Network error while connecting. Please reach out directly via email.', 'error');
+      } finally {
         setTimeout(() => {
           contactSubmitBtn.innerHTML = originalBtnHTML;
           contactSubmitBtn.style.background = '';
           contactSubmitBtn.disabled = false;
-        }, 3000);
-      }, 1200);
+        }, 3500);
+      }
     });
   }
 
@@ -581,6 +605,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const icon = type === 'success' 
       ? '<i class="fa-solid fa-circle-check"></i>' 
+      : type === 'error'
+      ? '<i class="fa-solid fa-circle-exclamation"></i>'
       : '<i class="fa-solid fa-bell"></i>';
 
     toast.innerHTML = `
